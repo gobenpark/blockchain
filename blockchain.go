@@ -8,14 +8,14 @@ import (
 )
 
 type Block struct {
-	Timestamp int64
-	Data []byte
+	Timestamp     int64
+	Data          []byte
 	PrevBlockHash []byte
-	Hash []byte
+	Hash          []byte
+	Nonce         int
 }
 
-
-func (b *Block) SetHash(){
+func (b *Block) SetHash() {
 	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
 	headers := bytes.Join([][]byte{b.PrevBlockHash, b.Data, timestamp}, []byte{})
 	hash := sha256.Sum256(headers)
@@ -23,36 +23,46 @@ func (b *Block) SetHash(){
 }
 
 func NewBlock(data string, prevBlockHash []byte) *Block {
+
+	// Step 1
+	//block := &Block{
+	//	Timestamp:     time.Now().Unix(),
+	//	Data:          []byte(data),
+	//	PrevBlockHash: prevBlockHash,
+	//	Hash:          []byte{},
+	//}
+
+	//Step2
 	block := &Block{
 		Timestamp:     time.Now().Unix(),
 		Data:          []byte(data),
 		PrevBlockHash: prevBlockHash,
 		Hash:          []byte{},
+		Nonce:         0,
 	}
+	pow := NewProofOfWork(block)
+	nonce, hash := pow.Run()
 
-	block.SetHash()
+	block.Hash = hash[:]
+	block.Nonce = nonce
 	return block
 }
-
-
 
 type Blockchain struct {
 	blocks []*Block
 }
 
-func (bc *Blockchain) AddBlock(data string){
+func (bc *Blockchain) AddBlock(data string) {
 	prevBlock := bc.blocks[len(bc.blocks)-1]
-	newBlock := NewBlock(data,prevBlock.Hash)
+	newBlock := NewBlock(data, prevBlock.Hash)
 	bc.blocks = append(bc.blocks, newBlock)
 }
-
 
 func NewGenesisBlock() *Block {
 	return NewBlock("Genesis Block", []byte{})
 }
 
-
-func NewBlockchain() *Blockchain{
+func NewBlockchain() *Blockchain {
 	return &Blockchain{
 		blocks: []*Block{NewGenesisBlock()},
 	}
