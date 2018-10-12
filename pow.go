@@ -9,6 +9,7 @@ import (
 	"strconv"
 )
 
+// 타겟 데이터 보다 작은 해시 값을 찾는다  nonce를 하나씩 올리면서
 const targetBits = 24
 
 type ProofOfWork struct {
